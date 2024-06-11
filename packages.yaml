@@ -1,37 +1,63 @@
 - name: Install Neovim and Deps
   hosts: vms
-  tasks:
-    - name: Grab Nvim
-      ansible.builtin.package:
-        name:
-          - neovim
-          - ranger
-          - lazygit
-          - git
-          - chezmoi
-          - zsh
-          - mcfly
-          - eza
-          - unzip
-          - go
-          - rsync
-          - delve
-          - ripgrep
-          - fd
-          - duf
-          - fzf
-          - kitty
-          - npm
-      become: yes
+  gather_facts: yes
+  vars:
+    common_packages: []
+    arch_packages:
+      - chezmoi
+      - delve
+      - duf
+      - eza
+      - fd
+      - fzf
+      - git
+      - go
+      - kitty
+      - lazygit
+      - mcfly
+      - neovim
+      - npm
+      - ranger
+      - ripgrep
+      - rsync
+      - unzip
+      - zsh
+    mac_packages:
+      - chezmoi
+      - delve
+      - duf
+      - eza
+      - fd
+      - fzf
+      - git
+      - go
+      - kitty
+      - lazygit
+      - mcfly
+      - neovim
+      - npm
+      - ranger
+      - ripgrep
+      - rsync
+      - unzip
+      - zsh
 
-    - name: Arch Packages
-      ansible.builtin.package:
-        name:
-          - eza
-          - fd
-          - duf
-          - fzf
+  tasks:
+    - name: Set Arch Package List
+      set_fact:
+        packages: "{{ arch_packages + common_packages }}"
+      when: ansible_distribution == "Archlinux"
+
+    - name: Set Mac Package List
+      set_fact:
+        packages: "{{ mac_packages + common_packages }}"
+      when: ansible_distribution == "Darwin"
+
+    - name: Install Packages
       become: yes
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
 
     - name: Install zap Zsh plugin manager
       ansible.builtin.shell: |
@@ -40,11 +66,6 @@
         creates: /home/{{ ansible_user }}/.local/share/zap
       become: no
       become_user: "{{ ansible_user }}"
-
-
-    - name: Print message
-      ansible.builtin.debug:
-        msg: Hello world
 
     - name: SSH Dir
       ansible.builtin.file:
