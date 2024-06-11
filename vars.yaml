@@ -1,0 +1,42 @@
+---
+copy_ssh_key: true
+common_packages: []
+arch_packages:
+  - chezmoi
+  - delve
+  - duf
+  - eza
+  - fd
+  - fzf
+  - git
+  - go
+  - kitty
+  - lazygit
+  - mcfly
+  - neovim
+  - npm
+  - ranger
+  - ripgrep
+  - rsync
+  - unzip
+  - zsh
+mac_packages:
+  - chezmoi
+  - delve
+  - duf
+  - eza
+  - fd
+  - fzf
+  - git
+  - go
+  - kitty
+  - lazygit
+  - mcfly
+  - neovim
+  - npm
+  - ranger
+  - ripgrep
+  - rsync
+  - unzip
+  - zsh
+

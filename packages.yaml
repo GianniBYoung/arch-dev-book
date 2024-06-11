@@ -1,46 +1,9 @@
+---
 - name: Install Neovim and Deps
   hosts: vms
   gather_facts: yes
-  vars:
-    common_packages: []
-    arch_packages:
-      - chezmoi
-      - delve
-      - duf
-      - eza
-      - fd
-      - fzf
-      - git
-      - go
-      - kitty
-      - lazygit
-      - mcfly
-      - neovim
-      - npm
-      - ranger
-      - ripgrep
-      - rsync
-      - unzip
-      - zsh
-    mac_packages:
-      - chezmoi
-      - delve
-      - duf
-      - eza
-      - fd
-      - fzf
-      - git
-      - go
-      - kitty
-      - lazygit
-      - mcfly
-      - neovim
-      - npm
-      - ranger
-      - ripgrep
-      - rsync
-      - unzip
-      - zsh
+  vars_files:
+    - vars.yaml
 
   tasks:
     - name: Set Arch Package List
@@ -81,7 +44,8 @@
       args:
         creates: /home/{{ ansible_user }}/.ssh/known_hosts
 
-    - name: Copy ssh
+    - name: Copy Private ssh key for Github Auth
+      when: copy_ssh_key | default(false) | bool
       ansible.builtin.copy:
         src: /home/gianni/.ssh/id_ecdsa
         dest: /home/{{ ansible_user  }}/.ssh/id_ecdsa
