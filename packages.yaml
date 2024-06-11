@@ -47,7 +47,7 @@
     - name: Copy Private ssh key for Github Auth
       when: copy_ssh_key | default(false) | bool
       ansible.builtin.copy:
-        src: /home/gianni/.ssh/id_ecdsa
+        src:  "{{ private_ssh_key_path }}"
         dest: /home/{{ ansible_user  }}/.ssh/id_ecdsa
         mode: '0600'
         owner: "{{ ansible_user }}"

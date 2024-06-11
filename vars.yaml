@@ -1,5 +1,6 @@
 ---
 copy_ssh_key: true
+private_ssh_key_path: "/home/gianni/.ssh/id_ecdsa"
 common_packages: []
 arch_packages:
   - chezmoi
