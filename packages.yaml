@@ -4,91 +4,82 @@
   gather_facts: yes
   vars_files:
     - vars.yaml
-
   tasks:
     - name: Set Arch Package List
       set_fact:
-        packages: "{{ arch_packages + common_packages }}"
+        packages: '{{ arch_packages + common_packages }}'
       when: ansible_distribution == "Archlinux"
-
     - name: Set Mac Package List
       set_fact:
-        packages: "{{ mac_packages + common_packages }}"
+        packages: '{{ mac_packages + common_packages }}'
       when: ansible_distribution == "Darwin"
-
+    - name: Set ubu Package List
+      set_fact:
+        packages: '{{ ubu_packages + common_packages }}'
+      when: ansible_distribution == "Ubuntu"
     - name: Install Packages
       become: yes
       ansible.builtin.package:
-        name: "{{ packages }}"
+        name: '{{ packages }}'
         state: present
-
     - name: Install zap Zsh plugin manager
       ansible.builtin.shell: |
         zsh <(curl -s https://raw.githubusercontent.com/zap-zsh/zap/master/install.zsh)
       args:
         creates: /home/{{ ansible_user }}/.local/share/zap
       become: no
-      become_user: "{{ ansible_user }}"
-
+      become_user: '{{ ansible_user }}'
     - name: SSH Dir
       ansible.builtin.file:
         path: /home/{{ ansible_user  }}/.ssh
         state: directory
-        mode: '0700'
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-
+        mode: "0700"
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
     - name: Add GitHub to known_hosts
       ansible.builtin.shell: |
         ssh-keyscan github.com >> /home/{{ ansible_user }}/.ssh/known_hosts
       args:
         creates: /home/{{ ansible_user }}/.ssh/known_hosts
-
     - name: Copy Private ssh key for Github Auth
       when: copy_ssh_key | default(false) | bool
       ansible.builtin.copy:
-        src:  "{{ private_ssh_key_path }}"
+        src: '{{ private_ssh_key_path }}'
         dest: /home/{{ ansible_user  }}/.ssh/id_ecdsa
-        mode: '0600'
-        owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-
+        mode: "0600"
+        owner: '{{ ansible_user }}'
+        group: '{{ ansible_user }}'
     - name: Chezmoi init
       args:
         creates: /home/{{ ansible_user }}/.local/share/chezmoi
       ansible.builtin.command:
         cmd: chezmoi init --apply git@github.com:GianniBYoung/frenchfiles.git
-
     - name: Set ZSH as Shell
       become: yes
       ansible.builtin.user:
-        name: "{{ ansible_user }}"
+        name: '{{ ansible_user }}'
         shell: /usr/bin/zsh
-
     - name: Steal OMZ Plugins
       ansible.builtin.git:
         repo: https://github.com/ohmyzsh/ohmyzsh.git
         dest: /home/{{ ansible_user }}/.zsh/omz
         version: master
-
     - name: Delete dumb home dir files
       ansible.builtin.file:
         state: absent
-        path: "{{ item }}"
+        path: '{{ item }}'
       loop:
-        - "/home/{{ ansible_user }}/.bash_history"
-        - "/home/{{ ansible_user }}/.bashrc"
-        - "/home/{{ ansible_user }}/.bash_logout"
-        - "/home/{{ ansible_user }}/.bash_profile"
-        - "/home/{{ ansible_user }}/.zshrc"
-        - "/home/{{ ansible_user }}/.zcompdump"
-        - "/home/{{ ansible_user }}/LICENSE"
-
+        - /home/{{ ansible_user }}/.bash_history
+        - /home/{{ ansible_user }}/.bashrc
+        - /home/{{ ansible_user }}/.bash_logout
+        - /home/{{ ansible_user }}/.bash_profile
+        - /home/{{ ansible_user }}/.zshrc
+        - /home/{{ ansible_user }}/.zcompdump
+        - /home/{{ ansible_user }}/LICENSE
     - name: Check if Lazy plugin manager is installed
       ansible.builtin.stat:
         path: /home/{{ ansible_user }}/.local/share/nvim/lazy
       register: lazy_installed
-
     - name: Install Nvim Plugins!
       ansible.builtin.command:
         cmd: nvim --headless +"Lazy! install" +qall
